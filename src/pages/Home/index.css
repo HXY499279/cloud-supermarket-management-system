@@ -1,0 +1,66 @@
+#components-layout-demo-custom-trigger .trigger {
+    padding: 0 24px !important;
+    font-size: 18px !important;
+    line-height: 64px !important;
+    cursor: pointer !important;
+    transition: color 0.3s !important;
+  }
+  
+#components-layout-demo-custom-trigger .trigger:hover {
+  color: #1890ff !important;
+}
+
+#components-layout-demo-custom-trigger .logo {
+  height: 32px !important;
+  margin: 16px !important;
+  background: rgba(255, 255, 255, 0.3) !important;
+}
+
+.site-layout .site-layout-background {
+  background: #fff !important;
+}
+
+#sider, #menu{
+  background-color: rgb(38, 48, 49) !important;
+}
+.ant-menu-item-selected{
+  background-color: rgb(86, 107, 119) !important;
+}
+
+#logo{
+  cursor: pointer;
+}
+
+.ant-layout {
+  min-height: 100vh !important;
+  min-width: 1300PX !important;
+}
+
+.trigger{
+  position: absolute;
+  top: 10px !important;
+}
+.ant-descriptions-header{
+  margin-bottom:3PX !important ;
+}
+
+/* 公共样式 */
+/* 描述部分样式 */
+.descwraper{
+  background-color: white;
+  padding: 0 16PX
+}
+/* 内容部分样式 */
+.contentWraper {
+  margin: 20px 16px;
+  min-height: 408PX;
+}
+/* 面包屑样式 */
+.bdc{
+  background-color: white;
+  margin-bottom: 10PX;
+}
+/* 信息栏样式 */
+.desc{
+  background-color: white;
+}

@@ -1,0 +1,20 @@
+.ant-card-body{
+    padding: 0 10PX !important;
+}
+.detailWraper{
+    width:140PX;
+    height:90PX;
+    display:inline-block;
+    overflow:hidden;
+    margin-top: 10PX;
+}
+.detail{
+    width: 139PX;
+    height: 21.818PX;
+    overflow: hidden;
+}
+.editInput{
+    display: inline-block;
+    width: 75PX;
+    height: 21PX;
+}
