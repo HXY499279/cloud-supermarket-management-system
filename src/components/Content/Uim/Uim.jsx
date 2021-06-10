@@ -11,7 +11,6 @@ import UimChangePassword from '../../../utils/UimChangePassword/UimChangePasswor
 const getRandomuserParams = params => ({
     current: params.pagination.current,
     pageSize: params.pagination.pageSize,
-    ...params,
 });
 
 export default class Uim extends Component {
@@ -19,7 +18,7 @@ export default class Uim extends Component {
         data: [],
         pagination: {
             current: 1,
-            pageSize: 10
+            pageSize: 5
         },
         loading: false,
         status: 0
@@ -42,9 +41,11 @@ export default class Uim extends Component {
                 this.setState({
                     data: res.results
                 })
-                message.success('删除成功');
-            }, () => {
-                message.error('删除失败');
+                if (res.status === 'success') {
+                    message.success('删除成功');
+                } else {
+                    message.error('删除失败');
+                }
             })
     }
 
@@ -132,7 +133,6 @@ export default class Uim extends Component {
             data: getRandomuserParams(params),
         })
             .then(data => {
-                // console.log(data);
                 this.setState({
                     loading: false,
                     // 根据接口返回的数据源

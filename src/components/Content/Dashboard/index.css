@@ -1,5 +1,29 @@
 .Card_data{
     font-size: 25PX;
     font-weight: bold;
-    margin-left: 20PX;
+    margin-left: 40PX;
+}
+.dataCard{
+    padding-top: 10PX;
+    padding-bottom: 10PX;
+    margin-left: 14PX !important;
+    border-top:1px solid #f0f0f0 ;
+}
+.ant-card-head{
+    border: 0 !important;
+}
+.chart-rule{
+    display: flex;
+    justify-content: space-around;
+    margin-top: 60PX;
+}
+.chart-wraper{
+    width: 630PX;
+    background-color: #fff;
+    text-align: center;
+}
+.chart-title{
+    margin: 20PX 0;
+    font-weight: 700;
+    font-size: 20PX;
 }

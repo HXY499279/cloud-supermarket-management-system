@@ -1,0 +1,49 @@
+.search{
+    background-color: white;
+    padding: 0 3vh 3vh 3vh ;
+}
+.Om-input{
+    width: auto;
+}
+.Om-head{
+    background-color: white;
+    padding: 0 16PX;
+    display: flex;
+    justify-content: space-between;
+}
+.status-switch{
+    margin-top: 48PX;
+}
+.status-button{
+    color: black;
+    border-radius: 5PX;
+}
+.tableWraper{
+    min-height: 20vh;
+}
+.sub-order{
+    margin-left: 50PX;
+    text-align:start !important;
+}
+.commodity-details{
+    display: flex;
+}
+.commodity-details-item{
+    width: 20vw;
+}
+/* 订单状态颜色 */
+.willdelivery{
+    color: rgb(255, 208, 0);
+}
+.delivery{
+    color: rgb(0, 102, 255);
+}
+.success{
+    color: rgb(82, 192, 26);
+}
+.refund{
+    color: rgb(255, 208, 0);
+}
+.refunded{
+    color: red;
+}

@@ -6,8 +6,6 @@ import AdmAddAd from '../../../utils/AdmAddAd/AdmAddAd'
 import 'antd/dist/antd.css'
 import './index.css'
 
-
-
 export default class Adm extends Component {
     state = {
         adData: []

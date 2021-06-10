@@ -47,35 +47,16 @@ export default class MeNu extends Component {
                         商品信息管理
                     </Link>
                 </Menu.Item>
-                <SubMenu key="4" icon={<AlignLeftOutlined />} title="商品分类管理">
-                    <Menu.Item key="sub4-1" >
-                        <Link to="/home/tpc" >
-                            一级分类
+                <Menu.Item key="4" icon={<AlignLeftOutlined />} >
+                    <Link to="/home/category" >
+                        商品分类管理
+                    </Link>
+                </Menu.Item>
+                <Menu.Item key="5" icon={<FileTextOutlined />}>
+                        <Link to="/home/om" >
+                            订单信息管理
                         </Link>
-                    </Menu.Item>
-                    <Menu.Item key="sub4-2" >
-                        <Link to="/home/tsc" >
-                            二级分类
-                        </Link>
-                    </Menu.Item>
-                </SubMenu>
-                <SubMenu key="5" icon={<FileTextOutlined />} title="订单信息管理">
-                    <Menu.Item key="sub5-1" >
-                        <Link to="/home/oq" >
-                            订单查询
-                        </Link>
-                    </Menu.Item>
-                    <Menu.Item key="sub5-2" >
-                        <Link to="/home/od">
-                            订单配送
-                        </Link>
-                    </Menu.Item>
-                    <Menu.Item key="sub5-3" >
-                        <Link to="/home/rp" >
-                            退款处理
-                        </Link>
-                    </Menu.Item>
-                </SubMenu>
+                </Menu.Item>
                 <Menu.Item key="6" icon={<AccountBookOutlined />}>
                     <Link to="/home/adm" >
                         广告投放管理

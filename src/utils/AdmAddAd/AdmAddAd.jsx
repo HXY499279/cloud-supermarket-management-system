@@ -15,22 +15,26 @@ export default class AdmAddAd extends Component {
 
     onFinish = (data) => {
         console.log(data)
-        reqwest({
-            // 后端接口
-            url: '/addad',
-            method: 'post',
-            type: 'json',
-            // 传递给后端的数据
-            data: data,
-        })
-            .then(res => {
-                console.log(res)
-                message.success("广告添加成功！")
-                window.location.href = '/home/adm'
-            }, () => {
-                message.error("广告添加失败！")
+        if ( data.adCompany.search(/\s/) === -1 &&  data.adName.search(/\s/) === -1 && data.category.search(/\s/) === -1 && data.picture.search(/\s/) === -1) {
+            reqwest({
+                // 后端接口
+                url: '/addad',
+                method: 'post',
+                type: 'json',
+                // 传递给后端的数据
+                data: data,
             })
-    };
+                .then(res => {
+                    console.log(res)
+                    message.success("广告添加成功！")
+                    window.location.href = '/home/adm'
+                }, () => {
+                    message.error("广告添加失败！")
+                })
+        } else {
+            message.warning("输入内容不能含有空格！")
+        }
+    }
 
     render() {
         return (
@@ -53,7 +57,7 @@ export default class AdmAddAd extends Component {
                         label="广告公司"
                         name="adCompany"
                         required={false}
-
+                        rules={[{ required: true, message: '请输入广告公司名称！' }]}
                     >
                         <Input />
                     </Form.Item>
@@ -62,6 +66,7 @@ export default class AdmAddAd extends Component {
                         label="广告名称"
                         name="adName"
                         required={false}
+                        rules={[{ required: true, message: '请输入广告名称！' }]}
                     >
                         <Input />
                     </Form.Item>
@@ -70,6 +75,7 @@ export default class AdmAddAd extends Component {
                         label="所属分类"
                         name="category"
                         required={false}
+                        rules={[{ required: true, message: '请输入广告分类！' }]}
                     >
                         <Input />
                     </Form.Item>
@@ -78,12 +84,13 @@ export default class AdmAddAd extends Component {
                         label="图片地址"
                         name="picture"
                         required={false}
+                        rules={[{ required: true, message: '请输入广告图片地址！' }]}
                     >
                         <Input />
                     </Form.Item>
 
                     <Form.Item {...tailLayout}>
-                        <Button type="primary" htmlType="submit">
+                        <Button type="primary" htmlType="submit" style={{ borderRadius: 5 }}>
                             添加
                         </Button>
                     </Form.Item>

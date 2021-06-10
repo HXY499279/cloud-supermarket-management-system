@@ -1,0 +1,21 @@
+.demo-infinite-container {
+    height: 470px;
+    padding: 8px 24px;
+    overflow: auto;
+    border: 1px solid #e8e8e8;
+    border-radius: 4px;
+    background-color: white;
+  }
+  .demo-loading-container {
+    position: absolute;
+    bottom: 40px;
+    width: 100%;
+    text-align: center;
+  }
+  .ant-list-item{
+    padding: 12PX 44PX;
+  }
+  .ant-list-item-meta-title{
+    font-size: 19PX !important;
+    font-weight: 700 !important;
+  }

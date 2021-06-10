@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Card, Divider, Input, Popconfirm, Button, message } from 'antd';
+import { Card, Divider, Input, Popconfirm, Button, message, Image } from 'antd';
 import { EditOutlined, CloseOutlined } from '@ant-design/icons';
 import reqwest from 'reqwest';
 import './index.css'
@@ -93,9 +93,12 @@ export default class CommodityCard extends Component {
             <Card
                 style={{ width: 307, height: 375, margin: '0 auto' }}
                 cover={
-                    <img
+                    <Image
                         alt="example"
                         src={item.src}
+                        height={186}
+                        width={307}
+                        preview={false}
                     />
                 }
                 actions={[

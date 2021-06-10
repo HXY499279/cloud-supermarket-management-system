@@ -19,7 +19,7 @@ export default class Login extends Component {
         this.state = {
             admin: {
                 // 待更改-----------------------------------------------------------------------------
-                name: '',
+                asname: '',
                 password: ''
                 // 待更改-----------------------------------------------------------------------------
             },
@@ -32,7 +32,7 @@ export default class Login extends Component {
         // console.log(this.passwordElem.props.value)
         if (this.nameElem.props.value !== undefined && this.passwordElem.props.value !== undefined) {
             let admin = this.state.admin
-            admin.name = this.nameElem.props.value
+            admin.asname = this.nameElem.props.value
             admin.password = this.passwordElem.props.value
             this.setState({
                 admin
@@ -76,13 +76,13 @@ export default class Login extends Component {
             <div>
                 <Image id="pageLogin" src={pic} preview={false} />
                 <div id="formWrap">
-                    <p style={{ color: 'white', fontSize: 18 }}>请使用您的账号密码登录系统</p>
+                    <p className="login-p" style={{ color: 'white', fontSize: 18 }}>请使用您的账号密码登录系统</p>
                     <Form
                         initialValues={{ remember: true }}
                         {...layout}
                     >
                         <Form.Item
-                            name="username"
+                            name="asname"
                             rules={[{ required: true, message: '请输入你的用户名！' }]}
                         >
                             <Input ref={input => { this.nameElem = input }} style={{ borderRadius: 7 }} placeholder='请输入账号' />
@@ -105,8 +105,8 @@ export default class Login extends Component {
                             </Button>
                         </Form.Item>
                     </Form>
-                    <p style={{ color: 'white' }}>CQUPT-Supermarket-Management-System</p>
-                    <p style={{ color: 'white' }}>Designed By LTH</p>
+                    <p className="login-p" style={{ color: 'white' }}>CQUPT-Supermarket-Management-System</p>
+                    <p className="login-p" style={{ color: 'white' }}>Designed By LTH</p>
                 </div>
 
             </div>

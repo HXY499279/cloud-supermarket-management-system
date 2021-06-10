@@ -38,11 +38,13 @@ export default class UimChangePassword extends Component {
                 data: newdata,
             })
                 .then(res => {
-                    console.log(res)
-                    message.success("密码修改成功！")
-                    window.location.href = '/home/uim'
-                }, () => {
-                    message.error("密码修改失败！")
+                    if (res.status === 'success') {
+                        message.success("密码修改成功！")
+                        window.location.href = '/home/uim'
+                    } else {
+                        message.error("密码修改失败！")
+                        window.location.href = '/home/uim'
+                    }
                 })
         }
     };
