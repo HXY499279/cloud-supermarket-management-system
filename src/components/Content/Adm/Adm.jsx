@@ -1,18 +1,62 @@
 import React, { Component } from 'react'
-import { BrowserRouter, Route, Switch, Redirect, Link } from 'react-router-dom';
-import { Descriptions, Divider, Breadcrumb, Button, message, Popconfirm, Table, Tag, Upload, Image } from 'antd';
+import { BrowserRouter, Route, Switch, Link } from 'react-router-dom';
+import { Descriptions, Divider, Breadcrumb, Button, message, Popconfirm, Table, Upload, Image } from 'antd';
 import reqwest from 'reqwest';
+import axios from 'axios'
 import AdmAddAd from '../../../utils/AdmAddAd/AdmAddAd'
 import 'antd/dist/antd.css'
 import './index.css'
 
+
 export default class Adm extends Component {
     state = {
-        adData: []
+        adData: [],
+        adid: ''
     }
 
-    confirm(id) {
-        const data = { id: id }
+    property = {
+        name: 'file',
+        headers: {
+            authorization: 'authorization-text'
+        },
+        showUploadList: false,
+        customRequest: (data) => {
+            console.log(this.state.adData)
+
+            let formData = new FormData()
+            formData.append("file", data.file);
+            formData.append("adid", this.state.adid);
+            axios({
+                // 后端接口
+                url: '/modifyad',
+                method: 'post',
+                // 传递给后端的数据
+                data: formData,
+            })
+                .then(res => {
+                    console.log(res)
+                    let newData = res.data
+                    if (newData.status === '图片修改成功') {
+                        let adData = this.state.adData
+                        adData.forEach(item => {
+                            if (item.adid === this.state.adid) {
+                                item.picture = newData.url
+                            }
+                        })
+                        this.setState({
+                            adData
+                        })
+                        message.success("广告图片更改成功！")
+                    } else {
+                        message.error("广告图片更改失败！")
+                    }
+                })
+        },
+        maxCount: 1
+    };
+
+    confirm(adid) {
+        const data = { adid: adid }
         console.log(this.state.adData)
         reqwest({
             // 后端接口
@@ -22,46 +66,34 @@ export default class Adm extends Component {
             // 传递给后端的数据
             data: data,
         })
-        //根据返回的状态码status判断是否删除广告成功
+            //根据返回的状态码status判断是否删除广告成功
             .then(res => {
                 console.log(res)
-                this.setState({
-                    adData: res
-                },() => {
-                    console.log(this.state.adData)
-                })
-                message.success('删除成功');
-            }, () => {
-                message.error('删除失败');
+                if (res.status === "success") {
+                    this.setState({
+                        adData: res.results
+                    })
+                    message.success('删除成功');
+                } else {
+                    message.error('删除失败');
+
+                }
             })
     }
 
-    props = {
-        name: 'picture',
-        action: 'http://localhost:3000/modifyad',
-        headers: {
-            authorization: 'authorization-text',
-        },
-        showUploadList:false,
-        onChange(info) {
-            if (info.file.status !== 'uploading') {
-                console.log(info.file, info.fileList);
-            }
-            if (info.file.status === 'done') {
-                message.success(`${info.file.name} file uploaded successfully`);
-            } else if (info.file.status === 'error') {
-                message.error(`${info.file.name} file upload failed.`);
-            }
-        },
-    };
+    getAdid = (adid) => {
+        this.setState({
+            adid
+        })
+    }
 
     columns = [
         {
-            title: 'id',
-            dataIndex: 'id',
-            key: 'id',
+            title: 'adid',
+            dataIndex: 'adid',
+            key: 'adid',
             defaultSortOrder: 'ascend',
-            sorter: (a, b) => a.id - b.id,
+            sorter: (a, b) => a.adid - b.adid,
         },
         {
             title: '广告公司',
@@ -82,39 +114,40 @@ export default class Adm extends Component {
             title: '广告图片',
             key: 'picture',
             dataIndex: 'picture',
-            render: src => (
+            render: picture => (
                 <>
                     <Image
                         preview={false}
                         width={150}
-                        src={src}
+                        src={picture}
                     />
                 </>
             ),
         },
         {
             title: '操作',
-            dataIndex: 'id',
+            dataIndex: 'adid',
             key: 'operation',
-            render: (id) => {
+            render: (adid) => {
                 return (
                     <>
-                        <Upload {...this.props}>
+                        <Upload {...this.property}>
                             <Button
                                 type="primary"
                                 style={{ borderRadius: 5 }}
+                                onClick={this.getAdid.bind(this, adid)}
                             >
                                 修改图片
                             </Button>
                         </Upload>
                         <Button
                             type="primary"
-                            style={{ borderRadius: 5, marginTop: 10 }}
+                            style={{ borderRadius: 5, marginLeft: 13 }}
                             danger
                         >
                             <Popconfirm
                                 title="确定删除该广告吗?"
-                                onConfirm={this.confirm.bind(this, id)}
+                                onConfirm={this.confirm.bind(this, adid)}
                                 okText="确认"
                                 cancelText="取消"
                             >
@@ -138,6 +171,7 @@ export default class Adm extends Component {
             type: 'json',
         })
             .then(res => {
+                console.log(res)
                 this.setState({
                     adData: res
                 })
@@ -181,7 +215,7 @@ export default class Adm extends Component {
                     </div>
                     <div className="contentWraper">
                         <Switch>
-                            <Route path='/home/adm/addad' component={AdmAddAd} />
+                            <Route path='/home/adm/addad' component={AdmAddAd.bind(this,this.state.adData.length)} />
                             <Route path='/home/adm' component={this.TableComponent} />
                         </Switch>
                     </div>

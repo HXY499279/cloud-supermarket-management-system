@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Form, Input, Button, Checkbox, message, Image } from 'antd';
 import 'antd/dist/antd.css';
 import './index.css';
-import axios from 'axios'
+import reqwest from 'reqwest'
 import pic from '../../assets/2.jpg'
 
 const layout = {
@@ -18,10 +18,8 @@ export default class Login extends Component {
         super(props)
         this.state = {
             admin: {
-                // 待更改-----------------------------------------------------------------------------
                 asname: '',
                 password: ''
-                // 待更改-----------------------------------------------------------------------------
             },
             status: ''
         }
@@ -36,38 +34,40 @@ export default class Login extends Component {
             admin.password = this.passwordElem.props.value
             this.setState({
                 admin
-            })
-            // 待更改-----------------------------------------------------------------------------
-            axios.post('/login', this.state.admin)
-                // 待更改-----------------------------------------------------------------------------
-                .then((res) => {
-                    console.log(res)
-                    this.setState({
-                        // 待更改-----------------------------------------------------------------------------
-                        status: res.data.status
-                        // 待更改-----------------------------------------------------------------------------
+            }, () => {
+                // console.log(this.state.admin)
+                reqwest({
+                    url: '/login',
+                    method: 'post',
+                    type: 'json',
+                    data: this.state.admin
+                })
+                    .then((res) => {
+                        console.log(res)
+                        this.setState({
+                            status: res.status
+                        }, () => {
+                            let status = this.state.status
+                            if (status === 'success') {
+                                message.success("登陆成功！")
+                                let adminObj = JSON.stringify(this.state.admin)
+                                // console.log(adminObj)
+                                sessionStorage.setItem("admin", adminObj)
+                                window.location.href = "./home"
+                            } else {
+                                message.error("账号或密码错误！")
+                                this.nameElem.input.value = ''
+                                this.passwordElem.input.value = ''
+                            }
+                        })
                     }, () => {
-                        let status = this.state.status
-                        // 待更改-----------------------------------------------------------------------------
-                        if (status === 'success') {
-                            // 待更改-----------------------------------------------------------------------------
-                            message.success("登陆成功！")
-                            let adminObj = JSON.stringify(this.state.admin)
-                            // console.log(adminObj)
-                            sessionStorage.setItem("admin", adminObj)
-                            window.location.href = "./home"
-                        } else {
-                            message.error("账号或密码错误！")
-                            this.nameElem.input.value = ''
-                            this.passwordElem.input.value = ''
-
-                        }
+                        message.error("服务器出错！")
                     })
+                    .catch(err => {
+                        message.error("服务器出错！")
+                    })
+            })
 
-                })
-                .catch(err => {
-                    message.error("服务器出错！")
-                })
         }
     }
 
@@ -92,7 +92,7 @@ export default class Login extends Component {
                             name="password"
                             rules={[{ required: true, message: '请输入你的密码！' }]}
                         >
-                            <Input.Password ref={input => { this.passwordElem = input }} style={{ borderRadius: 7 }}  placeholder='请输入密码' />
+                            <Input.Password ref={input => { this.passwordElem = input }} style={{ borderRadius: 7 }} placeholder='请输入密码' />
                         </Form.Item>
 
                         <Form.Item {...tailLayout} name="remember" valuePropName="checked">

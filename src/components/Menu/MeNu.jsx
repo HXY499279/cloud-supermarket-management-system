@@ -9,7 +9,6 @@ import {
     AccountBookOutlined
 } from '@ant-design/icons';
 import { Menu } from 'antd';
-const { SubMenu } = Menu;
 
 export default class MeNu extends Component {
 

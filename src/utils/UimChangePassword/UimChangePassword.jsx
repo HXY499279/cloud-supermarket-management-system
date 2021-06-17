@@ -17,18 +17,19 @@ export default class UimChangePassword extends Component {
         super(props)
         this.state = {
             data: {
-                id: 1,
+                uid: 1,
                 account: "",
-                password: ""
+                upassword: ""
             }
         }
 
     }
 
     onFinish = (predata, newdata) => {
-        if (newdata.modifiedpassword === predata.password) {
+        if (newdata.modifiedpassword === predata.upassword) {
             message.warning("密码未修改！")
         } else {
+            console.log(newdata)
             reqwest({
                 // 后端接口
                 url: '/modifypassword',
@@ -50,6 +51,7 @@ export default class UimChangePassword extends Component {
     };
 
     componentWillMount = () => {
+        console.log(this.props)
         this.setState({
             data: this.props.data[0]
         })
@@ -57,9 +59,9 @@ export default class UimChangePassword extends Component {
 
     render() {
         const { data = {
-            id: 1,
+            uid: 1,
             account: "",
-            password: ""
+            upassword: ""
         } } = this.state
         return (
             <div>
@@ -83,10 +85,10 @@ export default class UimChangePassword extends Component {
                     onFinish={this.onFinish.bind(this, data)}
                 >
                     <Form.Item
-                        label="id"
-                        name="id"
+                        label="uid"
+                        name="uid"
                         required={false}
-                        initialValue={`${data.id}`}
+                        initialValue={`${data.uid}`}
                         hidden
                     >
                         <Input hidden />
@@ -105,9 +107,9 @@ export default class UimChangePassword extends Component {
                         label="用户密码"
                         name="modifiedpassword"
                         required={false}
-                        initialValue={`${data.password}`}
+                        initialValue={`${data.upassword}`}
                     >
-                        <Input.Password />
+                        <Input.Password  />
                     </Form.Item>
 
                     <Form.Item {...tailLayout}>

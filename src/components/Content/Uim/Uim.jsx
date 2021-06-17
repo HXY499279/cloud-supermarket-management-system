@@ -1,8 +1,8 @@
 import React, { Component, } from 'react'
 import { Descriptions, Divider, Breadcrumb, Table, Button, message, Popconfirm } from 'antd';
 import reqwest from 'reqwest';
-import axios from 'axios';
 import { BrowserRouter, Link, Route, Switch, } from 'react-router-dom'
+import { nanoid } from 'nanoid'
 import 'antd/dist/antd.css'
 import './index.css'
 import UimChangePassword from '../../../utils/UimChangePassword/UimChangePassword'
@@ -18,15 +18,16 @@ export default class Uim extends Component {
         data: [],
         pagination: {
             current: 1,
-            pageSize: 5
+            pageSize: 6,
+            total: ''
         },
         loading: false,
         status: 0
     };
 
-    confirm(id) {
+    confirm(uid) {
         let { current, pageSize } = this.state.pagination
-        const data = { id: id, current, pageSize }
+        const data = { uid: uid, current, pageSize }
         reqwest({
             // 后端接口
             url: '/deleteuser',
@@ -39,7 +40,7 @@ export default class Uim extends Component {
             .then(res => {
                 console.log(res)
                 this.setState({
-                    data: res.results
+                    data: res.users
                 })
                 if (res.status === 'success') {
                     message.success('删除成功');
@@ -51,11 +52,9 @@ export default class Uim extends Component {
 
     columns = [
         {
-            title: 'id',
-            dataIndex: 'id',
-            key: 'id',
-            defaultSortOrder: 'ascend',
-            sorter: (a, b) => a.id - b.id,
+            title: '用户ID',
+            dataIndex: 'uid',
+            key: 'uid',
         },
         {
             title: '账号',
@@ -64,21 +63,21 @@ export default class Uim extends Component {
         },
         {
             title: '密码',
-            dataIndex: 'password',
-            key: 'password',
+            dataIndex: 'upassword',
+            key: 'upassword',
         },
         {
             title: '操作',
-            dataIndex: 'id',
-            key: 'id',
-            render: (id) => {
+            dataIndex: 'uid',
+            key: 'uid',
+            render: (uid) => {
                 return (
                     <>
                         <Button
                             type="primary"
                             style={{ borderRadius: 5 }}
                         >
-                            <Link to={`/home/uim/changepassword/${id}`}>
+                            <Link to={`/home/uim/changepassword/${uid}`}>
                                 更改密码
                             </Link>
                         </Button>
@@ -89,7 +88,7 @@ export default class Uim extends Component {
                         >
                             <Popconfirm
                                 title="确定删除该用户吗?"
-                                onConfirm={this.confirm.bind(this, id)}
+                                onConfirm={this.confirm.bind(this, uid)}
                                 okText="确认"
                                 cancelText="取消"
                             >
@@ -133,10 +132,11 @@ export default class Uim extends Component {
             data: getRandomuserParams(params),
         })
             .then(data => {
+                console.log(data, 111111)
                 this.setState({
                     loading: false,
                     // 根据接口返回的数据源
-                    data: data.results,
+                    data: data.users,
                     pagination: {
                         ...params.pagination,
                         // 根据接口返回的总条数
@@ -148,21 +148,29 @@ export default class Uim extends Component {
     };
 
     UimChangePasswordComponent = (props) => {
-        let id = props.match.params.id * 1
+        let uid = props.match.params.uid * 1
         let dataitem = this.state.data.filter(item => {
-            if (item.id === id) {
+            if (item.uid === uid) {
                 return item
+            } else {
+                return 0
             }
         })
+        console.log(dataitem)
         return <UimChangePassword data={dataitem} />
     }
 
     render() {
         const { data, pagination, loading } = this.state;
+        // let encryptedUser = JSON.parse(JSON.stringify(data))
+        // encryptedUser.forEach(item => {
+        //     item.upassword = "******"
+        // })
+        // console.log(this.state.data)
         function TableComponent() {
             return <Table
                 columns={this.columns}
-                rowKey={record => record.login}
+                rowKey={nanoid()}
                 dataSource={data}
                 pagination={pagination}
                 loading={loading}
@@ -186,7 +194,7 @@ export default class Uim extends Component {
                 <div className="contentWraper">
                     <BrowserRouter>
                         <Switch>
-                            <Route path='/home/uim/changepassword/:id?' component={this.UimChangePasswordComponent} />
+                            <Route path='/home/uim/changepassword/:uid?' component={this.UimChangePasswordComponent} />
                             <Route path='/home/uim' component={TableComponent.bind(this)} />
                         </Switch>
                     </BrowserRouter>

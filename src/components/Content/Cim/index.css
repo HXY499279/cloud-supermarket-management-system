@@ -5,3 +5,8 @@
 .CimInput{
     width: auto;
 }
+.content-scroll{
+    /* margin-left: 10PX !important; */
+    height: 44vw !important;
+    overflow-y: scroll;
+}

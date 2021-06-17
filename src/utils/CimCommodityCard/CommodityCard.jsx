@@ -17,56 +17,63 @@ export default class CommodityCard extends Component {
 
     }
     // 删除商品操作
-    delete = (id) => {
-        console.log(typeof id)
-        this.props.renderCommodityList(id)
+    delete = (cid) => {
+        console.log(typeof cid)
+        this.props.renderCommodityList(cid)
     }
     // 确认编辑操作,发送表单请求到后端
     comfimEdit = () => {
         const [
-            id,
+            cid,
             currentPrice,
             inventory,
-            weight,
-            category,
             originalPrice,
-            salesVolume,
-            originalPlace
         ] = [
-                this.state.data.id,
+                this.state.data.cid,
                 this.currentPriceElev.state.value,
                 this.inventoryElev.state.value,
-                this.weightElev.state.value,
-                this.categoryElev.state.value,
                 this.originalPriceElev.state.value,
-                this.salesVolumeElev.state.value,
-                this.originalPlaceElev.state.value
             ]
-        const data = {
-            id,
+        const newData = {
+            cid,
             currentPrice,
             inventory,
-            weight,
-            category,
             originalPrice,
-            salesVolume,
-            originalPlace
         }
-        console.log(data)
+        console.log(this.state.data)
+        console.log(newData)
         reqwest({
             url: '/editcommodity',
             method: 'post',
             type: 'json',
-            data: data
+            data: newData
         })
             .then(res => {
-                this.setState({
-                    data: res[0],
-                    isEdit: false
-                })
-                message.success("更改成功！")
-            },() => {
-                message.error("更改失败！")
+                if (res.status === "success") {
+                    message.success("更改成功！")
+                    console.log(this.state.data)
+                    let oldData = this.state.data;
+                    [
+                        oldData.currentPrice,
+                        oldData.inventory,
+                        oldData.originalPrice,
+                    ] = [
+                            newData.currentPrice,
+                            newData.inventory,
+                            newData.originalPrice,
+                        ]
+                    this.setState({
+                        data: oldData,
+                        isEdit: false
+                    })
+                } else {
+                    message.error("更改失败！")
+                    let oldData = this.state.data;
+                    this.setState({
+                        data: oldData,
+                        isEdit: false
+                    })
+                }
             })
     }
     // 属性函数化
@@ -88,13 +95,16 @@ export default class CommodityCard extends Component {
 
     render() {
         const item = this.state.data
+        if (item.src === undefined ) {
+            // console.log(item)
+        }
         const isEdit = this.state.isEdit
         return (
             <Card
                 style={{ width: 307, height: 375, margin: '0 auto' }}
                 cover={
                     <Image
-                        alt="example"
+                        alt="图片出错"
                         src={item.src}
                         height={186}
                         width={307}
@@ -109,7 +119,7 @@ export default class CommodityCard extends Component {
                         <EditOutlined key="edit" onClick={this.edit} />,
                     <Popconfirm
                         title="确定删除该商品吗?"
-                        onConfirm={this.delete.bind(this, item.id)}
+                        onConfirm={this.delete.bind(this, item.cid)}
                         okText="确认"
                         cancelText="取消"
                     >
@@ -118,25 +128,25 @@ export default class CommodityCard extends Component {
                 ]}
             // loading={true}
             >
-                <p style={{ margin: '10PX 0 0 0 ', fontWeight: 900, fontSize: 18 }}>{item.commodityName}</p>
+                <p style={{ margin: '10PX 0 0 0 ', fontWeight: 900, fontSize: 18, textAlign: 'center' }}>{item.commodityName}</p>
                 <div className='detailWraper'>
-                    <div className='detail'>编号: {item.id}
+                    <div className='detail'>编号: {item.cid}
                     </div>
                     <Divider style={{ margin: 0 }} />
                     <div className='detail'>现价: {this.propertyEdit('currentPrice')}元</div>
                     <Divider style={{ margin: 0 }} />
-                    <div className='detail'>库存: {this.propertyEdit('inventory')}件 </div>
+                    <div className='detail'>进货量: {this.propertyEdit('inventory')}件 </div>
                     <Divider style={{ margin: 0 }} />
-                    <div className='detail'>规格: {this.propertyEdit('weight')}g </div>
+                    <div className='detail'>规格: {item.weight}g </div>
                 </div>
                 <div className='detailWraper'>
-                    <div className='detail'>分类: {this.propertyEdit('category')} </div>
+                    <div className='detail' title={item.category}>分类: {item.category} </div>
                     <Divider style={{ margin: 0 }} />
                     <div className='detail'>原价: {this.propertyEdit('originalPrice')}元 </div>
                     <Divider style={{ margin: 0 }} />
-                    <div className='detail'>销量: {this.propertyEdit('salesVolume')}件 </div>
+                    <div className='detail'>销量: {item.salesVolume}件 </div>
                     <Divider style={{ margin: 0 }} />
-                    <div className='detail'>产地: {this.propertyEdit('originalPlace')} </div>
+                    <div className='detail' title={item.originalPlace}>产地: {item.originalPlace} </div>
                 </div>
             </Card>
         )

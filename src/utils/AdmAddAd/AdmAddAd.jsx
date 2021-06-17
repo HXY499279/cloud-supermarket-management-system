@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import { Form, Input, Button, message, PageHeader } from 'antd';
+import { Form, Input, Button, message, PageHeader, Upload } from 'antd';
 import './index.css'
-import reqwest from 'reqwest';
+import axios from 'axios'
 
 const layout = {
     labelCol: { span: 8 },
@@ -12,17 +12,47 @@ const tailLayout = {
 };
 
 export default class AdmAddAd extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            file: '',
+            adid: '',
+            adNumber: props
+        }
+        console.log(props)
+    }
+
+    property = {
+        name: 'file',
+        headers: {
+            authorization: 'authorization-text'
+        },
+        beforeUpload: () => {
+            return false
+        },
+        maxCount: 1
+    };
+
+    uploadTheadid = () => {
+
+    }
 
     onFinish = (data) => {
-        console.log(data)
-        if ( data.adCompany.search(/\s/) === -1 &&  data.adName.search(/\s/) === -1 && data.category.search(/\s/) === -1 && data.picture.search(/\s/) === -1) {
-            reqwest({
+        if (data.adCompany.search(/\s/) === -1 && data.adName.search(/\s/) === -1 && data.category.search(/\s/) === -1) {
+            let formData = new FormData()
+            formData.append("file", data.file.file);
+            formData.append("adCompany", data.adCompany);
+            formData.append("adName", data.adName);
+            formData.append("category", data.category)
+            // console.log(data.file)
+            // console.log(formData.get("file"))
+
+            axios({
                 // 后端接口
                 url: '/addad',
                 method: 'post',
-                type: 'json',
                 // 传递给后端的数据
-                data: data,
+                data: formData,
             })
                 .then(res => {
                     console.log(res)
@@ -37,7 +67,7 @@ export default class AdmAddAd extends Component {
     }
 
     render() {
-        return (
+        return (this.state.adNumber >= 3) ? (window.location.href = "/home/adm") : (
             <div>
                 <PageHeader
                     className="site-page-header"
@@ -52,6 +82,7 @@ export default class AdmAddAd extends Component {
                     size="large"
                     initialValues={{ remember: true }}
                     onFinish={this.onFinish}
+                    encType="multipart/form-data"
                 >
                     <Form.Item
                         label="广告公司"
@@ -82,11 +113,19 @@ export default class AdmAddAd extends Component {
 
                     <Form.Item
                         label="图片地址"
-                        name="picture"
+                        name="file"
                         required={false}
                         rules={[{ required: true, message: '请输入广告图片地址！' }]}
                     >
-                        <Input />
+                        <Upload {...this.property}>
+                            <Button
+                                type="primary"
+                                size="middle"
+                                style={{ borderRadius: 5 }}
+                            >
+                                上传图片
+                            </Button>
+                        </Upload>
                     </Form.Item>
 
                     <Form.Item {...tailLayout}>

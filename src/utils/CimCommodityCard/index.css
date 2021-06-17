@@ -4,6 +4,7 @@
 .detailWraper{
     width:140PX;
     height:90PX;
+    padding-left: 10PX;
     display:inline-block;
     overflow:hidden;
     margin-top: 10PX;
@@ -11,10 +12,14 @@
 .detail{
     width: 139PX;
     height: 21.818PX;
-    overflow: hidden;
+    overflow: hidden !important;
+    /* text-overflow: ellipsis !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 1 !important;
+    -webkit-box-orient: vertical !important; */
 }
 .editInput{
     display: inline-block;
-    width: 75PX;
+    width: 70PX;
     height: 21PX;
 }

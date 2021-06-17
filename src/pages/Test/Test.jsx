@@ -1,36 +1,31 @@
 import React, { Component } from 'react'
-import { Link } from 'react-router-dom';
-import { Breadcrumb } from 'antd'
+import {  Upload, message, Button } from 'antd'
 
-const routes = [
-    {
-        path: 'home',
-        breadcrumbName: 'home',
+const props = {
+    name: 'file',
+    action: '/modifyad',
+    headers: {
+        authorization: 'authorization-text',
     },
-    {
-        path: 'first',
-        breadcrumbName: 'first',
+    onChange(info) {
+        if (info.file.status !== 'uploading') {
+            console.log(info.file, info.fileList);
+        }
+        if (info.file.status === 'done') {
+            message.success(`${info.file.name} file uploaded successfully`);
+        } else if (info.file.status === 'error') {
+            message.error(`${info.file.name} file upload failed.`);
+        }
     },
-    {
-        path: 'second',
-        breadcrumbName: 'second',
-    },
-];
-
-function itemRender(route, params, routes, paths) {
-    const last = routes.indexOf(route) === routes.length - 1;
-    return last ? (
-        <span>{route.breadcrumbName}</span>
-    ) : (
-        <Link to={paths.join('/')}>{route.breadcrumbName}</Link>
-    );
-}
+};
 
 export default class Test extends Component {
     render() {
         return (
             <div>
-                <Breadcrumb itemRender={itemRender} routes={routes} />
+                <Upload {...props}>
+                    <Button type="primary">Click to Upload</Button>
+                </Upload>
             </div>
         )
     }

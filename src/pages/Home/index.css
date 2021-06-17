@@ -37,8 +37,8 @@
 }
 
 .trigger{
-  position: absolute;
-  top: 10px !important;
+  position: relative;
+  bottom: 13px !important;
 }
 .ant-descriptions-header{
   margin-bottom:3PX !important ;
@@ -64,3 +64,8 @@
 .desc{
   background-color: white;
 }
+/* 内容区滚动
+.content-scroll{
+  height: 44vw !important;
+  overflow-y: scroll;
+} */

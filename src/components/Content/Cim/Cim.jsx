@@ -1,7 +1,8 @@
-import React, { Component, Fragment } from 'react'
-import { Descriptions, Divider, Breadcrumb, Button, Input, message, InputNumber, Empty, Tag, Select, Col, Row, Space, Affix } from 'antd';
+import React, { Component } from 'react'
+import { Descriptions, Divider, Breadcrumb, Button, Input, message, InputNumber, Empty, Select, Col, Row, Space, Affix } from 'antd';
 import { BrowserRouter, Link, Switch, Route } from 'react-router-dom'
-import { DownOutlined, UserOutlined, SearchOutlined } from '@ant-design/icons'
+import { SearchOutlined } from '@ant-design/icons'
+import InfiniteScroll from 'react-infinite-scroller';
 import { nanoid } from 'nanoid'
 import './index.css'
 import reqwest from 'reqwest';
@@ -11,22 +12,75 @@ import CimAddCommodity from '../../../utils/CimAddCommodity/CimAddCommodity'
 const { Option } = Select;
 
 export default class Cim extends Component {
+
     state = {
-        commodityData: [],
-        subCategory: []
-    }
+        data: [],
+        subCategory: [],
+        loading: false,
+        hasMore: true,
+        total: '',
+        isAddCategory: false,
+        count: 0,
+        pageSize: 8
+    };
+
+    fetchData = callback => {
+        let count = this.state.count
+        let pageSize = this.state.pageSize
+        count += 1
+        this.setState({
+            count: count
+        })
+        let data = { count, pageSize }
+        reqwest({
+            url: '/commoditylist',
+            type: 'json',
+            method: 'post',
+            data: data,
+            success: res => {
+                callback(res);
+            },
+        });
+    };
+
+    handleInfiniteOnLoad = () => {
+        let { data, total } = this.state;
+        this.setState({
+            loading: true,
+        });
+        if (data.length >= total) {
+            message.warning('商品已展示完毕');
+            this.setState({
+                hasMore: false,
+                loading: false,
+            });
+            return;
+        }
+        this.fetchData(res => {
+            data = data.concat(res.commodities);
+            this.setState({
+                data,
+                loading: false,
+                total: res.total
+            });
+        });
+    };
+
     // 删除操作，请求数据库重新渲染数据到页面
-    renderCommodityList = (id) => {
-        console.log(this.state.commodityData)
+    renderCommodityList = (cid) => {
+        let count = this.state.count
+        let pageSize = this.state.pageSize
+        let end = count * pageSize
         reqwest({
             url: '/deletecommodity',
             method: 'post',
             type: 'json',
-            data: { id }
+            data: { cid, end }
         })
             .then(res => {
+                console.log(res)
                 this.setState({
-                    commodityData: res.results
+                    data: res.commodities
                 })
                 message.success('删除成功');
             }, () => {
@@ -35,7 +89,8 @@ export default class Cim extends Component {
     }
     // 展示商品列表
     showCommodity = () => {
-        return this.state.commodityData.map((item, index) => {
+        console.log(this.state.data)
+        return this.state.data.map((item, index) => {
             return (
                 // 循环项的key值，不要用index，可以用nanoid来设置
                 <Col span={6} style={{ marginBottom: 20 }} key={nanoid()} >
@@ -46,7 +101,7 @@ export default class Cim extends Component {
     }
     // 搜索商品
     CimSearch = () => {
-        let [id, commodityName = ' ', category = ' ', status] = [
+        let [cid, commodityName = ' ', category = ' ', status] = [
             this.idInput.value,
             this.nameInput.state.value,
             this.categorySelect.value,
@@ -57,7 +112,7 @@ export default class Cim extends Component {
             str = str.replace(/\s/g, ',')
             str = str.split(/[,，；;.。]/g)
             let string = ''
-            str = str.map(item => {
+            str.forEach(item => {
                 if (item !== '') {
                     string += (item)
                 }
@@ -66,10 +121,10 @@ export default class Cim extends Component {
         }
         commodityName = reg(commodityName)
         category = reg(category)
-        if (id !== '') {
-            id *= 1
+        if (cid !== '') {
+            cid *= 1
         }
-        const searchCondition = { id, commodityName, category, status }
+        const searchCondition = { cid, commodityName, category, status }
         console.log(searchCondition)
         reqwest({
             url: '/searchcommodity',
@@ -79,9 +134,16 @@ export default class Cim extends Component {
         })
             .then(res => {
                 console.log(res)
-                this.setState({
-                    commodityData: res
-                })
+                if (res.status === 'success') {
+                    this.setState({
+                        data: res.commodities,
+                        total:res.total
+                    })
+                    message.success("搜索成功！")
+                } else {
+                    message.error("查无该商品！")
+                }
+
             })
     }
     // 获取下拉框的值
@@ -96,67 +158,74 @@ export default class Cim extends Component {
     // 渲染分类下拉框的选项
     showCategoryList = () => {
         return this.state.subCategory.map((item, index) => {
-            console.log(item.category)
+            // console.log(item.category)
             return <Option value={`${item.category}`} key={nanoid()}>{item.category}</Option>
         })
     }
     // 渲染初始商品操作页面
     showCommodityInit = () => {
-        return <>
-            <Affix>
-                <div className="search">
-                    <Divider style={{ margin: 0 }} />
-                    <Space style={{ marginTop: 20 }} size={20}>
-                        <div>
-                            id:
-                        <InputNumber name='id' className="CimInput" ref={elev => { this.idInput = elev }} />
+        const Demo = () => {
+            return (
+                <div className="background">
+                    <Affix target={() => this.commodityListElev}>
+                        <div className="search">
+                            <Divider style={{ margin: 0 }} />
+                            <Space style={{ marginTop: 20 }} size={20}>
+                                <div>
+                                    商品编号:
+                                    <InputNumber name='cid' className="CimInput" min={0} ref={elev => { this.idInput = elev }} />
+                                </div>
+                                <div>
+                                    商品名称:
+                                    <Input name="commodity" className="CimInput" ref={elev => { this.nameInput = elev }} />
+                                </div>
+                                <div>
+                                    商品分类:
+                                    <Select
+                                        name='category'
+                                        style={{ width: 100 }}
+                                        ref={elev => { this.categorySelect = elev }}
+                                        onChange={this.categorySelectChange}
+                                    >
+                                        {this.showCategoryList()}
+                                    </Select >
+                                </div>
+                                <div>
+                                    商品状态:
+                                    <Select
+                                        name='status'
+                                        style={{ width: 100 }}
+                                        defaultValue='在售'
+                                        ref={elev => { this.statusSelect = elev }}
+                                        onChange={this.statusSelectChange}
+                                    >
+                                        <Option value="在售">在售</Option>
+                                        <Option value="已下架">已下架</Option>
+                                    </Select >
+                                </div>
+                                <div style={{ marginLeft: 20 }}>
+                                    <Button type="primary" shape="circle" icon={<SearchOutlined />} onClick={this.CimSearch} />
+                                </div>
+                                <div style={{ marginLeft: 20 }}>
+                                    <Button type="primary" style={{ borderRadius: 5 }}>
+                                        <Link to="/home/cim/addcommodity">
+                                            添加商品
+                                        </Link>
+                                    </Button>
+                                </div>
+                            </Space>
                         </div>
-                        <div>
-                            商品名称:
-                        <Input name="commodity" className="CimInput" ref={elev => { this.nameInput = elev }} />
-                        </div>
-                        <div>
-                            分类:
-                            <Select
-                                name='category'
-                                style={{ width: 100 }}
-                                ref={elev => { this.categorySelect = elev }}
-                                onChange={this.categorySelectChange}
-                            >
-                                {this.showCategoryList()}
-                            </Select >
-                        </div>
-                        <div>
-                            商品状态:
-                            <Select
-                                name='status'
-                                style={{ width: 100 }}
-                                defaultValue='onsale'
-                                ref={elev => { this.statusSelect = elev }}
-                                onChange={this.statusSelectChange}
-                            >
-                                <Option value="onsale">在售</Option>
-                                <Option value="soldout">下架</Option>
-                            </Select >
-                        </div>
-                        <div style={{ marginLeft: 20 }}>
-                            <Button type="primary" shape="circle" icon={<SearchOutlined />} onClick={this.CimSearch} />
-                        </div>
-                        <div style={{ marginLeft: 20 }}>
-                            <Button type="primary" style={{ borderRadius: 5 }}>
-                                <Link to="/home/cim/addcommodity">
-                                    添加商品
-                                </Link>
-                            </Button>
-                        </div>
-                    </Space>
+                    </Affix>
                 </div>
-            </Affix>
+            );
+        };
+        return <>
+            <Demo />
             <div className="contentWraper">
-                <div style={{ padding: '0 0PX' }}>
-                    {/* {console.log(this.state.commodityData)} */}
-                    {(undefined === this.state.commodityData[0]) ? <Empty style={{ paddingTop: 150 }} /> :
-                        <Row gutter={10} style={{ marginLeft: 10 }}>
+                <div style={{ padding: 0 }}>
+                    {/* {console.log(this.state.data)} */}
+                    {(undefined === this.state.data[0]) ? <Empty style={{ paddingTop: 150 }} /> :
+                        <Row gutter={10} className="">
                             {
                                 this.showCommodity()
                             }
@@ -168,53 +237,57 @@ export default class Cim extends Component {
     }
 
     componentDidMount = () => {
-        // 请求商品列表
-        reqwest({
-            url: '/commoditylist',
-            method: 'get',
-            type: 'json'
-        })
-            .then(res => {
-                // console.log(res.results)
-                this.setState({
-                    commodityData: res.results
-                })
-            })
+        console.log("页面初始渲染")
+        this.fetchData(res => {
+            console.log(res)
+            this.setState({
+                data: res.commodities,
+                total: res.total
+            });
+        });
         // 请求分类列表
         reqwest({
-            url: '/category/subcategory',
+            url: '/category/allcategory',
             method: 'get',
             type: 'json'
         })
             .then(res => {
                 // console.log(res.results)
                 this.setState({
-                    subCategory: res.results
+                    subCategory: res
                 })
             })
     }
 
     render() {
         return (
-            <div>
-                <Divider style={{ margin: 0 }} />
-                <div className="descwraper">
-                    <Breadcrumb className="bdc">
-                        <Breadcrumb.Item>
-                            <a href="/home">主页</a>
-                        </Breadcrumb.Item>
-                        <Breadcrumb.Item>商品信息管理</Breadcrumb.Item>
-                    </Breadcrumb>
-                    <Descriptions title="商品管理" className="desc">
-                        <Descriptions.Item>仓库商品信息展示，可以进行新增商品，搜索商品，编辑商品，删除商品操作</Descriptions.Item>
-                    </Descriptions>
-                </div>
-                <BrowserRouter>
-                    <Switch>
-                        <Route path="/home/cim/addcommodity" component={CimAddCommodity} />
-                        <Route path="/home/cim" component={this.showCommodityInit} />
-                    </Switch>
-                </BrowserRouter>
+            <div className="content-scroll" ref={elev => { this.commodityListElev = elev }}>
+                <InfiniteScroll
+                    initialLoad={false}
+                    pageStart={0}
+                    loadMore={this.handleInfiniteOnLoad}
+                    hasMore={!this.state.loading && this.state.hasMore}
+                    useWindow={false}
+                >
+                    <Divider style={{ margin: 0 }} />
+                    <div className="descwraper">
+                        <Breadcrumb className="bdc">
+                            <Breadcrumb.Item>
+                                <a href="/home">主页</a>
+                            </Breadcrumb.Item>
+                            <Breadcrumb.Item>商品信息管理</Breadcrumb.Item>
+                        </Breadcrumb>
+                        <Descriptions title="商品管理" className="desc">
+                            <Descriptions.Item>仓库商品信息展示，可以进行新增商品，搜索商品，编辑商品，删除商品操作</Descriptions.Item>
+                        </Descriptions>
+                    </div>
+                    <BrowserRouter>
+                        <Switch>
+                            <Route path="/home/cim/addcommodity" component={CimAddCommodity} />
+                            <Route path="/home/cim" component={this.showCommodityInit} />
+                        </Switch>
+                    </BrowserRouter>
+                </InfiniteScroll>
             </div>
         )
     }

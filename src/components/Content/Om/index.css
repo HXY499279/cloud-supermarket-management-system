@@ -47,3 +47,6 @@
 .refunded{
     color: red;
 }
+.of-last-item-hidden{
+    display: none;
+}

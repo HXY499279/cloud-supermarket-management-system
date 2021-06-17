@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { Descriptions, Divider, Breadcrumb, Popconfirm, Button, List, message, Space, Input, Spin } from 'antd';
-import { Link } from 'react-router-dom'
 import reqwest from 'reqwest';
 import InfiniteScroll from 'react-infinite-scroller';
 import { nanoid } from 'nanoid'
@@ -14,32 +13,24 @@ export default class Category extends Component {
         hasMore: true,
         total: '',
         isAddCategory: false,
-        reqCount: 0
+        count: 0,
+        pageSize: 8
     };
 
-    componentDidMount() {
-        this.fetchData(res => {
-            this.setState({
-                data: res.results,
-                total: res.total
-            });
-        });
-    }
-
     fetchData = callback => {
-        let reqCount = this.state.reqCount
-        reqCount += 1
+        let count = this.state.count
+        let pageSize = this.state.pageSize
+        count += 1
         this.setState({
-            reqCount:reqCount
+            count: count
         })
-        let data = {reqCount}
-        data = JSON.stringify(data)
+        let data = { count, pageSize }
+        // console.log(data)
         reqwest({
             url: '/category/categorylist',
-            type: 'json',
             method: 'post',
-            data:data,
-            contentType: 'application/json',
+            data: data,
+            type: 'json',
             success: res => {
                 callback(res);
             },
@@ -69,41 +60,68 @@ export default class Category extends Component {
         });
     };
 
-    addCategory = () => {
-        console.log(this.categoryInput.state.value)
-        let category = this.categoryInput.state.value
-        if (category !== undefined && category !== '' && category.search(/\s/) === -1) {
-            reqwest({
-                url: '/category/addcategory',
-                method: 'post',
-                type: 'json',
-                data: { category },
-                success: res => {
-                    this.setState({
-                        data: res.results
-                    })
-                    this.categoryInput.input.value = ''
-                    this.categoryInput.state.value = ''
-                    if (res.status === 'success') {
-                        message.success("新增分类成功！")
-                    } else {
-                        message.error("新增分类失败！")
-                    }
-                }
-            })
-        } else {
-            message.warning("输入内容不能为空或含有空格！")
+    // 判断新加的分类是否已存在
+    judgeCategoryNameIsExist = (categoryName) => {
+        let tag = 0
+        this.state.data.forEach(item => {
+            if (item.category === categoryName) {
+                tag = 1
+            }
+        })
+        return tag
+    }
 
+    addCategory = () => {
+        // console.log(this.categoryInput.state.value)
+        let categoryName = this.categoryInput.state.value
+        let pageSize = this.state.pageSize
+        if (
+            undefined !== categoryName &&
+            categoryName !== '' &&
+            categoryName.search(/\s/) === -1
+        ) {
+            if (this.judgeCategoryNameIsExist(categoryName)) {
+                message.error("分类已存在！")
+            } else {
+                categoryName = categoryName.replace(/[A-z]|[0-9]/g,'')
+                categoryName = categoryName.replace(/[$￥@#*（）【】/，:：‘’“”""[\]{}()-_——+~·^%&',;=?$\x22]/g,'')
+                console.log(categoryName)
+                reqwest({
+                    url: '/category/addcategory',
+                    method: 'post',
+                    type: 'json',
+                    data: { categoryName, pageSize },
+                })
+                    .then(res => {
+                        // console.log(res, 1111111111)
+                        this.setState({
+                            data: res.results
+                        })
+                        this.categoryInput.input.value = ''
+                        this.categoryInput.state.value = ''
+                        if (res.status === 'success') {
+                            message.success("新增分类成功！")
+                        } else {
+                            message.error("新增分类失败！")
+                        }
+                    })
+            }
+        } else {
+            message.warning("输入内容不能为空或含有空格")
         }
     }
 
-    deleteCategory = (cateid) => {
+    deleteCategory = (caid) => {
+        let count = this.state.count
+        let pageSize = this.state.pageSize
+        let end = count * pageSize
         reqwest({
             url: '/category/deletecategory',
             method: 'post',
             type: 'json',
-            data: { cateid },
-            success: (res) => {
+            data: { caid, end },
+        })
+            .then((res) => {
                 this.setState({
                     data: res.results
                 })
@@ -112,8 +130,7 @@ export default class Category extends Component {
                 } else {
                     message.error("删除分类失败！")
                 }
-            }
-        })
+            })
     }
 
     AddCategoryIsTrue = () => {
@@ -126,6 +143,16 @@ export default class Category extends Component {
         this.setState({
             isAddCategory: false
         })
+    }
+
+    componentDidMount() {
+        this.fetchData(res => {
+            console.log(res)
+            this.setState({
+                data: res.results,
+                total: res.total
+            });
+        });
     }
 
     render() {
@@ -198,7 +225,7 @@ export default class Category extends Component {
                                     <List.Item key={nanoid()}>
                                         <List.Item.Meta
                                             title={item.category}
-                                            style={{fontSize:20}}
+                                            style={{ fontSize: 20 }}
                                         />
                                         <Button
                                             type="primary"
@@ -207,7 +234,7 @@ export default class Category extends Component {
                                         >
                                             <Popconfirm
                                                 title="确定删除该分类吗?"
-                                                onConfirm={this.deleteCategory.bind(this, item.cateid)}
+                                                onConfirm={this.deleteCategory.bind(this, item.caid)}
                                                 okText="确认"
                                                 cancelText="取消"
                                             >
